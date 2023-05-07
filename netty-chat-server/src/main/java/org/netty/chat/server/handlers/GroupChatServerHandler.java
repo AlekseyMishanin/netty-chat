@@ -10,23 +10,23 @@ import io.netty.util.concurrent.GlobalEventExecutor;
  */
 public class GroupChatServerHandler extends SimpleChannelInboundHandler<String> {
 
-    private final ChannelGroup channelGroup = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+    private static final ChannelGroup CHANNEL_GROUP = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
         Channel channel = ctx.channel();
 
-        channelGroup.writeAndFlush("[system] %s joined to the chat room\n".formatted(channel.remoteAddress()));
-        channelGroup.add(channel);
-        System.out.println("The size of chat group is " + channelGroup.size());
+        CHANNEL_GROUP.writeAndFlush("[system] %s joined to the chat room\n".formatted(channel.remoteAddress()));
+        CHANNEL_GROUP.add(channel);
+        System.out.println("The size of chat group is " + CHANNEL_GROUP.size());
     }
 
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
         Channel channel = ctx.channel();
 
-        channelGroup.writeAndFlush("[system] %s left the chat room\n".formatted(channel.remoteAddress()));
-        System.out.println("The size of chat group is " + channelGroup.size());
+        CHANNEL_GROUP.writeAndFlush("[system] %s left the chat room\n".formatted(channel.remoteAddress()));
+        System.out.println("The size of chat group is " + CHANNEL_GROUP.size());
     }
 
     @Override
@@ -43,11 +43,11 @@ public class GroupChatServerHandler extends SimpleChannelInboundHandler<String> 
     protected void channelRead0(ChannelHandlerContext ctx, String message) throws Exception {
         Channel currentChannel = ctx.channel();
 
-        channelGroup.forEach(channel -> {
+        CHANNEL_GROUP.forEach(channel -> {
             if (currentChannel != channel) {
-                channel.writeAndFlush("[member] %s: %s\n".formatted(currentChannel.remoteAddress(), message));
+                channel.writeAndFlush("[member] %s: %s".formatted(currentChannel.remoteAddress(), message));
             } else {
-                channel.writeAndFlush("[I] send %s\n".formatted(message));
+                channel.writeAndFlush("[I] send %s".formatted(message));
             }
         });
     }
