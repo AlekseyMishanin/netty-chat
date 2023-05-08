@@ -7,8 +7,14 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
+import io.netty.handler.timeout.IdleStateHandler;
 import lombok.AllArgsConstructor;
 import org.netty.chat.server.handlers.GroupChatServerHandler;
+import org.netty.chat.server.handlers.HeartbeatHandler;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Chat server
@@ -29,14 +35,17 @@ public class GroupChatServer {
                     .channel(NioServerSocketChannel.class)
                     .option(ChannelOption.SO_BACKLOG, 128)
                     .childOption(ChannelOption.SO_KEEPALIVE, true)
+                    .handler(new LoggingHandler(LogLevel.INFO))
                     .childHandler(new ChannelInitializer<SocketChannel>() {
 
                         @Override
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
                             socketChannel.pipeline()
+                                    .addLast(new IdleStateHandler(1, 1, 1, TimeUnit.MINUTES))
                                     .addLast("decoder", new StringDecoder())
                                     .addLast("encoder", new StringEncoder())
-                                    .addLast("chat", new GroupChatServerHandler());
+                                    .addLast("chat", new GroupChatServerHandler())
+                                    .addLast("heartbeat", new HeartbeatHandler());
                         }
                     });
 

@@ -4,6 +4,7 @@ import io.netty.channel.*;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
+import org.netty.chat.server.events.LiveActivityEvent;
 
 /**
  *
@@ -47,9 +48,11 @@ public class GroupChatServerHandler extends SimpleChannelInboundHandler<String> 
             if (currentChannel != channel) {
                 channel.writeAndFlush("[member] %s: %s".formatted(currentChannel.remoteAddress(), message));
             } else {
-                channel.writeAndFlush("[I] send %s".formatted(message));
+                channel.writeAndFlush("[I] send: %s".formatted(message));
             }
         });
+
+        ctx.fireUserEventTriggered(new LiveActivityEvent());
     }
 
     @Override
