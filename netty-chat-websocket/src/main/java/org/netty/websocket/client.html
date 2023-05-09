@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <form onsubmit="return false">
+        <textarea name="message"
+                  style="height: 400px; width: 400px"></textarea>
+        <input type="button"
+               value="Send"
+               onclick="send(this.form.message.value)" />
+        <textarea id="response"
+                  style="height: 400px; width: 400px"></textarea>
+        <input type="button"
+        value="Reset"
+        onclick="document.getElementById('response').value=''" />
+    </form>
+
+    <script>
+        var socket;
+        if (window.WebSocket) {
+            socket = new WebSocket("ws://localhost:8090/chat");
+            socket.onmessage = function (event) {
+                const chat = getChat();
+                chat.value = chat.value + "\n" + event.data;
+            }
+            socket.onopen = function (event) {
+                const chat = getChat();
+                chat.value = "Connection is opened";
+            }
+            socket.onclose = function (event) {
+                const chat = getChat();
+                chat.value = chat.value + "\nConnection is closed";
+            }
+        } else {
+            alert("Web socket is not supported")
+        }
+
+        function send(message) {
+            if (window.socket) {
+                if (socket.readyState == WebSocket.OPEN) {
+                    socket.send(message);
+                } else {
+                    alert("Unknown socket status " + socket.readyState);
+                }
+            }
+        }
+
+        function getChat() {
+            return document.getElementById("response");
+        }
+
+    </script>
+</body>
+</html>

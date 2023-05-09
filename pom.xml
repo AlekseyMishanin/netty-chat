@@ -19,6 +19,7 @@
     <modules>
         <module>netty-chat-server</module>
         <module>netty-chat-client</module>
+        <module>netty-chat-websocket</module>
     </modules>
 
     <properties>
